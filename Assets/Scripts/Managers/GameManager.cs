@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour {
     
@@ -19,6 +20,11 @@ public class GameManager : MonoBehaviour {
 	private float _timeToCalm;
 
     public int aliveTime = 0;
+    public int aliveEnemies = 4;
+
+    public string curState;
+
+    public static System.Random random = new System.Random();
 
     private static GameManager _instance;
 
@@ -31,7 +37,6 @@ public class GameManager : MonoBehaviour {
                 _instance = GameObject.FindObjectOfType<GameManager>();
                 DontDestroyOnLoad(_instance.gameObject);
             }
-
             return _instance;
         }
     }
@@ -49,6 +54,19 @@ public class GameManager : MonoBehaviour {
         }
 
         AssignGhosts();
+    }
+
+    public void killEnemy()
+    {
+        aliveEnemies--;
+        if (aliveEnemies == 0){
+            SceneManager.LoadScene("end");
+        }
+    }
+
+    public void setCurState(string s)
+    {
+        curState = s;
     }
 
     public void incAliveTime()
@@ -82,19 +100,37 @@ public class GameManager : MonoBehaviour {
 
 	public void ResetScene()
 	{
+        AssignGhosts();
         CalmGhosts();
 
 		pacman.transform.position = new Vector3(15f, 11f, 0f);
-		blinky.transform.position = new Vector3(15f, 20f, 0f);
-		pinky.transform.position = new Vector3(14.5f, 17f, 0f);
-		inky.transform.position = new Vector3(16.5f, 17f, 0f);
-		clyde.transform.position = new Vector3(12.5f, 17f, 0f);
+        int x = random.Next(1, 25);
+        int y = random.Next(1, 25);
+        if (blinky != null)
+            blinky.transform.position = new Vector3(x, y, 0f);
+        x = random.Next(1, 25);
+        y = random.Next(1, 25);
+        if (pinky != null)
+            pinky.transform.position = new Vector3(x, y, 0f);
+        x = random.Next(1, 25);
+        y = random.Next(1, 25);
+        if (inky != null)
+            inky.transform.position = new Vector3(x, y, 0f);
+        x = random.Next(1, 25);
+        y = random.Next(1, 25);
+        if (clyde != null)
+            clyde.transform.position = new Vector3(x, y, 0f);
 
 		pacman.GetComponent<PlayerController>().ResetDestination();
-		blinky.GetComponent<GhostMove>().InitializeGhost();
-		pinky.GetComponent<GhostMove>().InitializeGhost();
-		inky.GetComponent<GhostMove>().InitializeGhost();
-		clyde.GetComponent<GhostMove>().InitializeGhost();
+
+        if (blinky != null)
+            blinky.GetComponent<GhostMove>().InitializeGhost();
+        if (pinky != null)
+            pinky.GetComponent<GhostMove>().InitializeGhost();
+        if (inky != null)
+            inky.GetComponent<GhostMove>().InitializeGhost();
+        if (clyde != null)
+            clyde.GetComponent<GhostMove>().InitializeGhost();
 
         gameState = GameState.Init;  
         gui.H_ShowReadyScreen();
@@ -102,10 +138,14 @@ public class GameManager : MonoBehaviour {
 
 	public void CalmGhosts()
 	{
-		blinky.GetComponent<GhostMove>().Calm();
-		pinky.GetComponent<GhostMove>().Calm();
-		inky.GetComponent<GhostMove>().Calm();
-		clyde.GetComponent<GhostMove>().Calm();
+        if (blinky != null)
+		    blinky.GetComponent<GhostMove>().Calm();
+        if (pinky != null)
+            pinky.GetComponent<GhostMove>().Calm();
+        if (inky != null)
+            inky.GetComponent<GhostMove>().Calm();
+        if (clyde != null)
+            clyde.GetComponent<GhostMove>().Calm();
     }
 
     void AssignGhosts()
@@ -115,7 +155,6 @@ public class GameManager : MonoBehaviour {
         inky = GameObject.Find("inky");
         blinky = GameObject.Find("blinky");
         pacman = GameObject.Find("pacman");
-
         gui = GameObject.FindObjectOfType<GameGUINavigation>();
     }
 

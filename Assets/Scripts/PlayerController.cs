@@ -18,6 +18,8 @@ public class PlayerController : MonoBehaviour
     public Text textArmor;
     public Text timer;
 
+    public GameObject player;
+
     public int time = 0;
 
     public static System.Random random = new System.Random();
@@ -35,6 +37,7 @@ public class PlayerController : MonoBehaviour
         textArmor.text = "Armor: " + GameManager.lives;
         _dest = transform.position;
         StartCoroutine(Countdown());
+        GM.setCurState(states[state]);
     }
 
     IEnumerator Countdown()
@@ -76,7 +79,7 @@ void FixedUpdate()
         Vector2 pos = transform.position;
         direction += new Vector2(direction.x * 0.45f, direction.y * 0.45f);
         RaycastHit2D hit = Physics2D.Linecast(pos + direction, pos);
-        return hit.collider.name == "pacdot" || (hit.collider == GetComponent<Collider2D>());
+        return hit.collider.name == "blue" || hit.collider.name == "yellow" || hit.collider.name == "red" || hit.collider.name == "pink" || (hit.collider == GetComponent<Collider2D>());
     }
 
     public void ResetDestination()
@@ -112,5 +115,41 @@ void FixedUpdate()
     public Vector2 getDir()
     {
         return _dir;
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.name == "yellow")
+        {
+            state = 0;
+            Destroy(other.gameObject);
+        }
+        else if (other.name == "blue")
+        {
+            state = 1;
+            Destroy(other.gameObject);
+        }
+        else if (other.name == "pink")
+        {
+            state = 2;
+            Destroy(other.gameObject);
+        }
+        else if (other.name == "red")
+        {
+            state = 3;
+            Destroy(other.gameObject);
+        }
+        textState.text = "state: " + states[state];
+        GM.setCurState(states[state]);
+        if (
+            (other.name == "pinky" && states[state] == "pink") ||
+            (other.name == "inky" && states[state] == "blue") ||
+            (other.name == "blinky" && states[state] == "red") ||
+            (other.name == "clyde" && states[state] == "yellow")
+           )
+        {
+            GM.killEnemy();
+            Destroy(other.gameObject);
+        }
     }
 }

@@ -6,8 +6,9 @@ using UnityEngine;
 public class GhostMove : MonoBehaviour {
 	private Vector3 waypoint;
 	private Queue<Vector3> waypoints;
-    
-	public Vector3 _direction;
+
+    public static System.Random random = new System.Random();
+    public Vector3 _direction;
 	public Vector3 direction 
 	{
 		get
@@ -32,7 +33,7 @@ public class GhostMove : MonoBehaviour {
 	private float timeToEndScatter;
 	private float timeToEndWait;
 
-	enum State { Wait, Init, Scatter, Chase, Run };
+	enum State { Wait, Init, Scatter, Run };
 	State state;
 
     private Vector3 _startPos;
@@ -74,10 +75,6 @@ public class GhostMove : MonoBehaviour {
 				Scatter();
 				break;
 
-			case State.Chase:
-				ChaseAI();
-				break;
-
 			case State.Run:
 				RunAway();
 				break;
@@ -106,6 +103,10 @@ public class GhostMove : MonoBehaviour {
 
     private void InitializeWaypoints(State st)
     {
+        if (GameObject.Find(name) == null)
+        {
+            return;
+        }
         string data = "";
         switch (name)
         {
@@ -232,19 +233,31 @@ public class GhostMove : MonoBehaviour {
 
     private Vector3 getStartPosAccordingToName()
     {
+        if (GameObject.Find(gameObject.name) == null)
+        {
+            return new Vector3();
+        }
         switch (gameObject.name)
         {
             case "blinky":
-                return new Vector3(15f, 20f, 0f);
+                int x = random.Next(1, 25);
+                int y = random.Next(1, 25);
+                return new Vector3(x, y, 0f);
 
             case "pinky":
-                return new Vector3(14.5f, 17f, 0f);
+                x = random.Next(1, 25);
+                y = random.Next(1, 25);
+                return new Vector3(x, y, 0f);
             
             case "inky":
-                return new Vector3(16.5f, 17f, 0f);
+                x = random.Next(1, 25);
+                y = random.Next(1, 25);
+                return new Vector3(x, y, 0f);
 
             case "clyde":
-                return new Vector3(12.5f, 17f, 0f);
+                x = random.Next(1, 25);
+                y = random.Next(1, 25);
+                return new Vector3(x, y, 0f);
         }
 
         return new Vector3();
@@ -253,16 +266,28 @@ public class GhostMove : MonoBehaviour {
 	void OnTriggerEnter2D(Collider2D other)
 	{
 		if(other.name == "pacman")
-		{
-		    if (state == State.Run)
+        {
+            if (gameObject.name == "pinky" && _gm.curState == "pink")
+            {
+                return;
+            }
+            if (gameObject.name == "inky" && _gm.curState == "blue")
+            {
+                return;
+            }
+            if (gameObject.name == "clyde" && _gm.curState == "yellow")
+            {
+                return;
+            }
+            if (gameObject.name == "blinky" && _gm.curState == "red")
+            {
+                return;
+            }
+            _gm.LoseLife();
+            if (state == State.Run)
 		    {
 		        Calm();
 		        InitializeGhost(_startPos);
-		    }
-		       
-		    else
-		    {
-		        _gm.LoseLife();
 		    }
 
 		}
@@ -308,24 +333,11 @@ public class GhostMove : MonoBehaviour {
 		if(Time.time >= timeToEndScatter)
 		{
 			waypoints.Clear();
-			state = State.Chase;
+			state = State.Run;
 		    return;
 		}
         
 		MoveToWaypoint(true);
-
-	}
-
-    void ChaseAI()
-	{
-        
-        if (Vector3.Distance(transform.position, waypoint) > 0.000000000001)
-		{
-			Vector2 p = Vector2.MoveTowards(transform.position, waypoint, speed);
-			GetComponent<Rigidbody2D>().MovePosition(p);
-		}
-        
-		else GetComponent<AI>().AILogic();
 
 	}
 
@@ -364,7 +376,7 @@ public class GhostMove : MonoBehaviour {
 	    if (state != State.Run) return;
 
 		waypoints.Clear ();
-		state = State.Chase;
+		state = State.Run;
 	    _timeToToggleWhite = 0;
 	    _timeToWhite = 0;
 	}
