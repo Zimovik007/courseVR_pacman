@@ -78,47 +78,4 @@ public class AI : MonoBehaviour {
 			ghost.direction = ghost.direction;
 		}
 	}
-
-
-	TileManager.Tile GetTargetTilePerGhost()
-    {
-        if (GameObject.Find(name) == null)
-        {
-            return null;
-        }
-        Vector3 targetPos;
-		TileManager.Tile targetTile;
-		Vector3 dir;
-		switch (name)
-		{
-		    case "blinky":
-			    targetPos = new Vector3(target.position.x + 0.499f, target.position.y + 0.499f);
-			    targetTile = tiles[manager.Index((int)targetPos.x, (int)targetPos.y)];
-			    break;
-		    case "pinky":
-			    dir = target.GetComponent<PlayerController>().getDir();
-			    targetPos = new Vector3(target.position.x + 0.499f, target.position.y + 0.499f) + 4 * dir;                
-			    if (dir == Vector3.up)
-                    targetPos -= new Vector3(4, 0, 0);
-			    targetTile = tiles[manager.Index((int)targetPos.x, (int)targetPos.y)];
-			    break;
-		    case "inky":
-			    dir = target.GetComponent<PlayerController>().getDir();
-			    Vector3 blinkyPos = GameObject.Find("blinky").transform.position;
-			    Vector3 ambushVector = target.position + 2 * dir - blinkyPos;
-			    targetPos = new Vector3(target.position.x + 0.499f, target.position.y + 0.499f) + 2 * dir + ambushVector;
-			    targetTile = tiles[manager.Index((int)targetPos.x, (int)targetPos.y)];
-			    break;
-		    case "clyde":
-			    targetPos = new Vector3(target.position.x + 0.499f, target.position.y + 0.499f);
-			    targetTile = tiles[manager.Index((int)targetPos.x, (int)targetPos.y)];
-			    if(manager.distance(targetTile, currentTile) < 9)
-				    targetTile = tiles[manager.Index(0, 2)];
-			    break;
-		    default:
-			    targetTile = null;
-			    break;		
-		}
-		return targetTile;
-	}
 }

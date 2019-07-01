@@ -122,24 +122,6 @@ public class TileManager : MonoBehaviour {
         }
 
     }
-    
-	void DrawNeighbors()
-	{
-		foreach(Tile tile in tiles)
-		{
-			Vector3 pos = new Vector3(tile.x, tile.y, 0);
-			Vector3 up = new Vector3(tile.x + 0.1f, tile.y + 1, 0);
-			Vector3 down = new Vector3(tile.x - 0.1f, tile.y - 1, 0);
-			Vector3 left = new Vector3(tile.x - 1, tile.y + 0.1f, 0);
-			Vector3 right = new Vector3(tile.x + 1, tile.y - 0.1f, 0);
-			
-			if(tile.up != null)		Debug.DrawLine(pos, up);
-			if(tile.down != null)	Debug.DrawLine(pos, down);
-			if(tile.left != null)	Debug.DrawLine(pos, left);
-			if(tile.right != null)	Debug.DrawLine(pos, right);
-		}
-		
-	}
 
 	public int Index(int X, int Y)
 	{

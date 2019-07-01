@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour {
     
-    public static int lives = 3;
+    public static int lives = 4;
 
 	public enum GameState { Init, Game, Dead }
 	public static GameState gameState;
@@ -81,7 +81,7 @@ public class GameManager : MonoBehaviour {
 
     void OnLevelWasLoaded()
     {
-        lives = 3;
+        lives = 4;
         
         AssignGhosts();
         ResetVariables();
@@ -98,28 +98,27 @@ public class GameManager : MonoBehaviour {
 			CalmGhosts();
 	}
 
+    public Vector3 getRandomVector3()
+    {
+        int x = random.Next(1, 25);
+        int y = random.Next(1, 25);
+        return new Vector3(x, y, 0);
+    }
+
 	public void ResetScene()
 	{
         AssignGhosts();
         CalmGhosts();
 
 		pacman.transform.position = new Vector3(15f, 11f, 0f);
-        int x = random.Next(1, 25);
-        int y = random.Next(1, 25);
         if (blinky != null)
-            blinky.transform.position = new Vector3(x, y, 0f);
-        x = random.Next(1, 25);
-        y = random.Next(1, 25);
+            blinky.transform.position = getRandomVector3();
         if (pinky != null)
-            pinky.transform.position = new Vector3(x, y, 0f);
-        x = random.Next(1, 25);
-        y = random.Next(1, 25);
+            pinky.transform.position = getRandomVector3();
         if (inky != null)
-            inky.transform.position = new Vector3(x, y, 0f);
-        x = random.Next(1, 25);
-        y = random.Next(1, 25);
+            inky.transform.position = getRandomVector3();
         if (clyde != null)
-            clyde.transform.position = new Vector3(x, y, 0f);
+            clyde.transform.position = getRandomVector3();
 
 		pacman.GetComponent<PlayerController>().ResetDestination();
 
@@ -162,11 +161,5 @@ public class GameManager : MonoBehaviour {
     {
         lives--;
         gameState = GameState.Dead;
-    }
-
-    public static void DestroySelf()
-    {
-        lives = 3;
-        Destroy(GameObject.Find("Game Manager"));
     }
 }

@@ -20,8 +20,7 @@ public class GhostMove : MonoBehaviour {
 		{
 			_direction = value;
 			Vector3 pos = new Vector3((int)transform.position.x, (int)transform.position.y, (int)transform.position.z);
-			waypoint = pos + _direction;
-		
+			waypoint = pos + _direction;		
 		}
 	}
 
@@ -37,30 +36,19 @@ public class GhostMove : MonoBehaviour {
 	State state;
 
     private Vector3 _startPos;
-    private float _timeToWhite;
-    private float _timeToToggleWhite;
-    private float _toggleInterval;
-    private bool isWhite = false;
     
 	public GameGUINavigation GUINav;
-    public PlayerController pacman;
     private GameManager _gm;
     
 	void Start()
 	{
 	    _gm = GameObject.Find("Game Manager").GetComponent<GameManager>();
-        _toggleInterval = _gm.scareLength * 0.33f * 0.20f;  
 		InitializeGhost();
 	}
 
-    public float DISTANCE;
-
 	void FixedUpdate ()
 	{
-	    DISTANCE = Vector3.Distance(transform.position, waypoint);
-
 		if(GameManager.gameState == GameManager.GameState.Game){
-
 			switch(state)
 			{
 			case State.Wait:
@@ -103,86 +91,34 @@ public class GhostMove : MonoBehaviour {
 
     private void InitializeWaypoints(State st)
     {
-        if (GameObject.Find(name) == null)
-        {
-            return;
-        }
-        string data = "";
+        float[] data = new float[] { -1, -1 };
         switch (name)
         {
-        case "blinky":
-            data = @"22 20
-22 26
-
-27 26
-27 30
-22 30
-22 26";
-            break;
-        case "pinky":
-            data = @"14.5 17
-14 17
-14 20
-7 20
-
-7 26
-7 30
-2 30
-2 26";
-            break;
-        case "inky":
-            data = @"16.5 17
-15 17
-15 20
-22 20
-
-22 8
-19 8
-19 5
-16 5
-16 2
-27 2
-27 5
-22 5";
-            break;
-        case "clyde":
-            data = @"12.5 17
-14 17
-14 20
-7 20
-
-7 8
-7 5
-2 5
-2 2
-13 2
-13 5
-10 5
-10 8";
-            break;
-        
+            case "blinky":
+                data = new float[] { 22, 20, 22, 26, -1, -1, 27, 26, 27, 30, 22, 30, 22, 26 };
+                break;
+            case "pinky":
+                data = new float[] { 14.5f, 17, 14, 17, 14, 20, 7, 20, -1, -1, 7, 26, 7, 30, 2, 30, 2, 26 };
+                break;
+            case "inky":
+                data = new float[] { 16.5f, 17, 15, 17, 15, 20, 22, 20, -1, -1, 22, 8, 19, 8, 19, 5, 16, 5, 16, 2, 27, 2, 27, 5, 22, 5 };
+                break;
+            case "clyde":
+                data = new float[] { 12.5f, 17, 14, 17, 14, 20, 7, 20, -1, -1, 7, 8, 7, 5, 2, 5, 2, 2, 13, 2, 13, 5, 10, 5, 10, 8 };
+                break;        
         }
-        
-        string line;
 
         waypoints = new Queue<Vector3>();
         Vector3 wp;
-
+        
         if (st == State.Init)
         {
-            using (StringReader reader = new StringReader(data))
+            for (int i = 0; i < data.Length; i += 2)
             {
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (line.Length == 0) break;
-
-                    string[] values = line.Split(' ');
-                    float x = float.Parse(values[0]);
-                    float y = float.Parse(values[1]);
-
-                    wp = new Vector3(x, y, 0);
-                    waypoints.Enqueue(wp);
-                }
+                if (data[i] == -1 && data[i + 1] == -1)
+                    continue;
+                wp = new Vector3(data[i], data[i + 1], 0);
+                waypoints.Enqueue(wp);
             }
         }
 
@@ -190,96 +126,47 @@ public class GhostMove : MonoBehaviour {
         {
             bool scatterWps = false;
 
-            using (StringReader reader = new StringReader(data))
+            for (int i = 0; i < data.Length; i += 2)
             {
-                while ((line = reader.ReadLine()) != null)
+                if (data[i] == -1 && data[i + 1] == -1)
                 {
-                    if (line.Length == 0)
-                    {
-                        scatterWps = true;
-                        continue;
-                    }
-
-                    if (scatterWps)
-                    {
-                        string[] values = line.Split(' ');
-                        int x = Int32.Parse(values[0]);
-                        int y = Int32.Parse(values[1]);
-
-                        wp = new Vector3(x, y, 0);
-                        waypoints.Enqueue(wp);
-                    }
+                    scatterWps = true;
+                    continue;
+                }
+                if (scatterWps)
+                {
+                    wp = new Vector3(data[i], data[i + 1], 0);
+                    waypoints.Enqueue(wp);
                 }
             }
         }
         
         if (st == State.Wait)
         {
-            Vector3 pos = transform.position;
-            
-            if (transform.name == "inky" || transform.name == "clyde")
-            {
-                waypoints.Enqueue(new Vector3(pos.x, pos.y - 0.5f, 0f));
-                waypoints.Enqueue(new Vector3(pos.x, pos.y + 0.5f, 0f));
-            }
-            else
-            {
-                waypoints.Enqueue(new Vector3(pos.x, pos.y + 0.5f, 0f));
-                waypoints.Enqueue(new Vector3(pos.x, pos.y - 0.5f, 0f));
-            }
+            Vector3 pos = transform.position;            
+            waypoints.Enqueue(new Vector3(pos.x, pos.y - 0.5f, 0f));
+            waypoints.Enqueue(new Vector3(pos.x, pos.y + 0.5f, 0f));
         }
 
     }
 
     private Vector3 getStartPosAccordingToName()
     {
-        if (GameObject.Find(gameObject.name) == null)
-        {
-            return new Vector3();
-        }
-        switch (gameObject.name)
-        {
-            case "blinky":
-                int x = random.Next(1, 25);
-                int y = random.Next(1, 25);
-                return new Vector3(x, y, 0f);
-
-            case "pinky":
-                x = random.Next(1, 25);
-                y = random.Next(1, 25);
-                return new Vector3(x, y, 0f);
-            
-            case "inky":
-                x = random.Next(1, 25);
-                y = random.Next(1, 25);
-                return new Vector3(x, y, 0f);
-
-            case "clyde":
-                x = random.Next(1, 25);
-                y = random.Next(1, 25);
-                return new Vector3(x, y, 0f);
-        }
-
-        return new Vector3();
+        int x = random.Next(1, 25);
+        int y = random.Next(1, 25);
+        return new Vector3(x, y, 0f);
     }
 
 	void OnTriggerEnter2D(Collider2D other)
 	{
-		if(other.name == "pacman")
+        if (other.name == "pacman")
         {
-            if (gameObject.name == "pinky" && _gm.curState == "pink")
-            {
-                return;
-            }
-            if (gameObject.name == "inky" && _gm.curState == "blue")
-            {
-                return;
-            }
-            if (gameObject.name == "clyde" && _gm.curState == "yellow")
-            {
-                return;
-            }
-            if (gameObject.name == "blinky" && _gm.curState == "red")
+            if (
+                (gameObject.name == "pinky" && _gm.curState == "pink") ||
+                (gameObject.name == "inky" && _gm.curState == "blue") ||
+                (gameObject.name == "clyde" && _gm.curState == "yellow") ||
+                (gameObject.name == "blinky" && _gm.curState == "red")
+               )
             {
                 return;
             }
@@ -306,18 +193,10 @@ public class GhostMove : MonoBehaviour {
 	}
 
 	void Init()
-	{
-	    _timeToWhite = 0;
-        
+	{        
 		if(waypoints.Count == 0)
 		{
 			state = State.Scatter;
-            
-			string name = GetComponent<SpriteRenderer>().sprite.name;
-			if(name[name.Length-1] == '0' || name[name.Length-1] == '1')	direction = Vector3.right;
-			if(name[name.Length-1] == '2' || name[name.Length-1] == '3')	direction = Vector3.left;
-			if(name[name.Length-1] == '4' || name[name.Length-1] == '5')	direction = Vector3.up;
-			if(name[name.Length-1] == '6' || name[name.Length-1] == '7')	direction = Vector3.down;
 
 			InitializeWaypoints(state);
 			timeToEndScatter = Time.time + scatterLength;
@@ -342,16 +221,14 @@ public class GhostMove : MonoBehaviour {
 	}
 
 	void RunAway()
-	{
-        if(Time.time >= _timeToWhite && Time.time >= _timeToToggleWhite)   ToggleBlueWhite();
-        
+	{        
         if (Vector3.Distance(transform.position, waypoint) > 0.000000000001)
 		{
 			Vector2 p = Vector2.MoveTowards(transform.position, waypoint, speed);
 			GetComponent<Rigidbody2D>().MovePosition(p);
-		}
-		
-		else GetComponent<AI>().RunLogic();
+		}		
+		else
+            GetComponent<AI>().RunLogic();
 
 	}
     
@@ -366,8 +243,10 @@ public class GhostMove : MonoBehaviour {
 		}
 		else
 		{
-			if(loop)	waypoints.Enqueue(waypoints.Dequeue());
-			else		waypoints.Dequeue();
+			if (loop)
+                waypoints.Enqueue(waypoints.Dequeue());
+			else
+                waypoints.Dequeue();
 		}
 	}
 
@@ -377,14 +256,6 @@ public class GhostMove : MonoBehaviour {
 
 		waypoints.Clear ();
 		state = State.Run;
-	    _timeToToggleWhite = 0;
-	    _timeToWhite = 0;
 	}
-
-    public void ToggleBlueWhite()
-    {
-        isWhite = !isWhite;
-        _timeToToggleWhite = Time.time + _toggleInterval;
-    }
 
 }
